@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Core.Entitities;
 using Core.Interfaces;
+using Core.Specification;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,10 +16,26 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
+
         public IProductRepository repo { get; }
-        public ProductsController(IProductRepository repo)
+
+        private readonly IGenricRepository<Product> _productrepo;
+        private readonly IGenricRepository<ProductBrand> _productbrandRepo;
+        private readonly IGenricRepository<ProductType> _productTyperepo;
+
+
+        public ProductsController(IGenricRepository<Product> productrepo, IGenricRepository<ProductBrand> productbrandRepo
+
+        , IGenricRepository<ProductType> productTyperepo)
         {
-            this.repo = repo;
+            _productrepo = productrepo;
+
+            _productbrandRepo = productbrandRepo;
+
+            _productTyperepo = productTyperepo;
+
+
+
 
         }
 
@@ -27,7 +44,8 @@ namespace API.Controllers
 
         {
 
-            var products = await repo.GetProductsAsync();
+            var spec = new ProductsWithProductTypesAndBrands();
+            var products = await _productrepo.ListAsync(spec);
             return Ok(products);
 
         }
@@ -35,8 +53,9 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> getProduct(int id)
         {
+            var spec = new ProductsWithProductTypesAndBrands(id);
 
-            return await repo.GetProductByIdAsync(id);
+            return await _productrepo.GetEntityWithSpec(spec);
 
         }
 
@@ -44,7 +63,7 @@ namespace API.Controllers
         public async Task<ActionResult<ProductBrand>> getProductBrands()
         {
 
-            return Ok(await repo.GetProductBrandsAsync());
+            return Ok(await _productbrandRepo.ListAllAsync());
 
         }
 
@@ -52,7 +71,7 @@ namespace API.Controllers
         public async Task<ActionResult<ProductBrand>> getProductTypes()
         {
 
-            return Ok(await repo.GetProductTypesAsync());
+            return Ok(await _productbrandRepo.ListAllAsync());
 
         }
 

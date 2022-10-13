@@ -31,6 +31,7 @@ namespace API
 
         {
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped(typeof(IGenricRepository<>), typeof(GenericRepository<>));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
